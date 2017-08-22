@@ -149,10 +149,10 @@ endif
 # Example: YUM_REPOS?=official epel => yum_repo_official and yum_repo_epel
 # will be used.
 YUM_REPOS?=official extras fuel
-MIRROR_CENTOS?=http://mirror.centos.org/centos/$(CENTOS_MAJOR)
+MIRROR_CENTOS?=http://10.84.8.166/centos/$(CENTOS_MAJOR)
 MIRROR_CENTOS_KERNEL?=$(MIRROR_CENTOS)
 SANDBOX_MIRROR_CENTOS_UPSTREAM?=$(MIRROR_CENTOS)
-SANDBOX_MIRROR_EPEL?=http://mirrors.isu.net.sa/pub/fedora/fedora-epel/
+SANDBOX_MIRROR_EPEL?=http://10.84.8.166/epel/7/x86_64/ 
 MIRROR_UBUNTU_METHOD?=http
 MIRROR_UBUNTU?=mirror.fuel-infra.org
 MIRROR_UBUNTU_ROOT?=/pkgs/ubuntu/
