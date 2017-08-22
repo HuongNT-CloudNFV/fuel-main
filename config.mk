@@ -133,7 +133,7 @@ LOCAL_MIRROR_UBUNTU_OS_BASEURL:=$(LOCAL_MIRROR_UBUNTU)
 # 'usa', 'cz'
 ifeq ($(USE_MIRROR),usa)
 MIRROR_FUEL?=http://mirror.seed-us1.fuel-infra.org/mos-repos/centos/$(PRODUCT_NAME)$(PRODUCT_VERSION)-centos$(CENTOS_MAJOR)/os/x86_64/
-MIRROR_UBUNTU?=mirror.seed-us1.fuel-infra.org
+MIRROR_UBUNTU?=10.84.8.121
 MIRROR_MOS_UBUNTU?=$(MIRROR_UBUNTU)
 endif
 
