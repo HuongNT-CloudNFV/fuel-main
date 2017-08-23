@@ -31,24 +31,6 @@ $(BUILD_DIR)/iso/isoroot.done: $(ISOROOT)/fuel_build_id
 $(ISOROOT)/fuel_build_id:
 	echo "$(BUILD_ID)" > $@
 
-##############
-# CUSTOM REPOS
-##############
-
-define default_deb_repos
-- name: mos
-  suite: $(MIRROR_MOS_UBUNTU_SUITE)
-endef
-
-# if we are not building packages and sync repos only, we MUST use
-# the same suit as we use during debmirroring
-ifeq ($(BUILD_PACKAGES),0)
-$(BUILD_DIR)/iso/isoroot.done: $(ISOROOT)/default_deb_repos.yaml
-endif
-$(ISOROOT)/default_deb_repos.yaml: export default_deb_repos_content:=$(default_deb_repos)
-$(ISOROOT)/default_deb_repos.yaml:
-	/bin/echo -e "$${default_deb_repos_content}\n" > $@
-
 ###############
 # CENTOS MIRROR
 ###############
@@ -106,6 +88,7 @@ $(ISOROOT)/ks.cfg: $(SOURCE_DIR)/iso/ks.template $(SOURCE_DIR)/iso/ks.py $(ISORO
 	python $(SOURCE_DIR)/iso/ks.py \
 		-t $(SOURCE_DIR)/iso/ks.template \
 		-c $(ISOROOT)/ks.yaml \
+		-u '{"CENTOS_RELEASE": "$(CENTOS_RELEASE)", "PRODUCT_VERSION": "$(PRODUCT_VERSION)"}' \
 		-o $@.tmp
 	mv $@.tmp $@
 
@@ -154,7 +137,7 @@ $(ISO_PATH): $(BUILD_DIR)/iso/isoroot.done
 	# vmlinuz + initrd + bootloader + conffile = about 38MB. 100M should be enough ^_^
 	dd bs=1M count=100 if=/dev/zero of=$(BUILD_DIR)/iso/efi_tmp/efiboot.img
 	# UEFI standard say to us that EFI partition should be some FAT-related filesystem
-	mkfs.vfat -n EFI $(BUILD_DIR)/iso/efi_tmp/efiboot.img
+	mkfs.vfat $(BUILD_DIR)/iso/efi_tmp/efiboot.img
 	sudo umount -l $(BUILD_DIR)/iso/efi_tmp/efi_image || true
 	sudo mount $(BUILD_DIR)/iso/efi_tmp/efiboot.img $(BUILD_DIR)/iso/efi_tmp/efi_image
 

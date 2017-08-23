@@ -25,7 +25,6 @@ VBOX_BLACKLIST_MODULES="i2c_piix4 intel_rapl"
 BOOTSTRAP_PACKAGES="yum-plugin-priorities yum-utils fuel-release"
 
 FUEL_PACKAGES=" \
-augeas \
 authconfig \
 bind-utils \
 bridge-utils \
@@ -46,7 +45,6 @@ ntp \
 ntpdate \
 puppet \
 python-pypcap \
-python-timmy \
 rsync \
 rubygem-netaddr \
 rubygem-openstack \
@@ -63,7 +61,6 @@ wget \
 
 ASTUTE_YAML='/etc/fuel/astute.yaml'
 BOOTSTRAP_NODE_CONFIG="/etc/fuel/bootstrap_admin_node.conf"
-CUSTOM_REPOS="/root/default_deb_repos.yaml"
 bs_build_log='/var/log/fuel-bootstrap-image-build.log'
 bs_status=0
 # Backup network configs to this folder. Folder will be created only if
@@ -240,6 +237,13 @@ echo $FUEL_PACKAGES | xargs -n1 yum install -y
 # /etc/fuel_openstack_version is provided by 'fuel-openstack-metadata' package
 OPENSTACK_VERSION=$(cat /etc/fuel_openstack_version)
 
+# We do not ship debian-installer kernel and initrd on ISO.
+# But we still need to be able to create ubuntu cobbler distro
+# which requires kernel and initrd to be available. So, we
+# just touch these files to work around cobbler's limitation.
+mkdir -p ${wwwdir}/${OPENSTACK_VERSION}/ubuntu/x86_64/images/
+touch ${wwwdir}/${OPENSTACK_VERSION}/ubuntu/x86_64/images/linux
+touch ${wwwdir}/${OPENSTACK_VERSION}/ubuntu/x86_64/images/initrd.gz
 
 touch /var/lib/hiera/common.yaml /etc/puppet/hiera.yaml
 
@@ -304,15 +308,11 @@ sed -i -e "s/^\s*PrintMotd no/PrintMotd yes/g" /etc/ssh/sshd_config
 cat >> /etc/motd << EOF
 
 All environments use online repositories by default.
-Use the python-packetary package to create local repositories:
+Use the following commands to create local repositories
+on master node and change default repository settings:
 
-yum install python-packetary
-packetary --help
-
-Use python-fuelclient package to modify default repository settings:
-
-yum install python-fuelclient (installed by default)
-fuel2 --help
+* CentOS: fuel-mirror (see --help for options)
+* Ubuntu: fuel-mirror (see --help for options)
 
 EOF
 
@@ -334,14 +334,6 @@ if (virt-what | fgrep -q "virtualbox") ; then
     rmmod ${module} || :
   done
 fi
-
-# change default repo path in fuel-menu before starting any deployment steps
-if [ -f "${CUSTOM_REPOS}" ]; then
-  fix_default_repos.py fuelmenu --repositories-file "${CUSTOM_REPOS}" || fail
-fi
-
-# setup stringify_facts for the puppet
-augtool set /files/etc/puppet/puppet.conf/main/stringify_facts false
 
 fuelmenu --save-only --iface=$ADMIN_INTERFACE || fail
 set +x
@@ -532,12 +524,6 @@ fi
 
 # apply puppet
 /etc/puppet/modules/fuel/examples/deploy.sh || fail
-# Update default repo path
-if [ -f "${CUSTOM_REPOS}" ]; then
-  fix_default_repos.py fuel \
-    --repositories-file "${CUSTOM_REPOS}" \
-    --release-version "${OPENSTACK_VERSION}" || fail
-fi
 
 # Sync time
 systemctl stop ntpd
@@ -554,8 +540,8 @@ else
 fi
 
 #Check if repo is accessible
-echo "Checking for access to updates repository/mirrorlist..."
-repourl=$(yum repolist all -v | awk '{if ($1 ~ "baseurl|mirrors" && $3 ~ "updates") print $3}' | head -1)
+echo "Checking for access to updates repository..."
+repourl=$(yum repolist all -v | awk '{if ($1 ~ "baseurl" && $3 ~ "updates") print $3}' | head -1)
 if urlaccesscheck check "$repourl" ; then
   UPDATE_ISSUES=0
 else

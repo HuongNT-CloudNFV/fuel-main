@@ -1,11 +1,10 @@
+ami-creator
 apr-util
 atop
-augeas
 augeas-libs
 bakefile
 @Base
 bash
-bind
 bzip2
 cloud-init
 cloud-utils
@@ -31,6 +30,7 @@ ethtool
 euca2ools
 fabric
 fence-agents-all
+gcc
 gdisk
 genisoimage
 GeoIP
@@ -48,6 +48,7 @@ ipxe-roms
 kernel
 kernel-devel
 kernel-headers
+kmod-e1000
 leveldb
 libevent-devel
 libiscsi
@@ -60,7 +61,6 @@ libyaml
 linux-firmware
 logrotate
 lrzip
-lshw
 lvm2
 mailcap
 mcollective
@@ -76,7 +76,6 @@ nodejs-nailgun
 openssh-clients
 openssl-devel
 openstack-keystone
-openstack-selinux
 os-client-config
 postgresql
 postgresql-devel
@@ -220,7 +219,6 @@ rubygem-ffi
 rubygem-ffi-yajl
 rubygem-httpclient
 rubygem-i18n
-rubygem-inifile
 rubygem-ipaddress
 rubygem-json
 rubygem-librarian-puppet-simple

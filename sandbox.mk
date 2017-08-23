@@ -42,16 +42,6 @@ gpgcheck=0
 priority=3
 endef
 
-ifdef EXTRA_RPM_BUILDDEP_REPO
-define yum_extra_build_repo
-[extra_build]
-name=Extra Build
-baseurl=$(EXTRA_RPM_BUILDDEP_REPO)
-gpgcheck=0
-priority=2
-endef
-endif
-
 define sandbox_yum_conf
 [main]
 cachedir=/tmp/cache
@@ -131,7 +121,6 @@ $(yum_upstream_repo)
 $(yum_epel_repo)
 $(yum_local_repo)
 $(yum_local_mos_repo)
-$(yum_extra_build_repo)
 EOF
 echo $(SANDBOX_PACKAGES) | xargs -n1 | xargs -I_package sudo sh -c 'rm -vf $(SANDBOX)/etc/yum.repos.d/Cent*; chroot $(SANDBOX) yum -y --nogpgcheck install _package'
 # clean all repos except the MOS + upsream + our epel
@@ -158,7 +147,7 @@ deb $(MIRROR_MOS_UBUNTU_METHOD)://$(MIRROR_MOS_UBUNTU)$(MIRROR_MOS_UBUNTU_ROOT) 
 deb $(MIRROR_MOS_UBUNTU_METHOD)://$(MIRROR_MOS_UBUNTU)$(MIRROR_MOS_UBUNTU_ROOT) $(MIRROR_MOS_UBUNTU_SUITE)-holdback $(MIRROR_MOS_UBUNTU_SECTION)
 
 #Extra repositories
-$(if $(EXTRA_DEB_REPOS),$(subst |,$(NEWLINE)deb ,deb $(EXTRA_DEB_REPOS)))
+$(if $(EXTRA_DEB_REPOS),$(subst |,$(newline)deb ,deb $(EXTRA_DEB_REPOS)))
 endef
 
 define apt_preferences
@@ -205,11 +194,7 @@ sudo cp /etc/resolv.conf $(SANDBOX_UBUNTU)/etc/resolv.conf
 if [ -e $(SANDBOX_UBUNTU)/etc/hosts ]; then sudo cp -a $(SANDBOX_UBUNTU)/etc/hosts $(SANDBOX_UBUNTU)/etc/hosts.orig; fi
 sudo cp /etc/hosts $(SANDBOX_UBUNTU)/etc/hosts
 echo "Generating utf8 locale"
-sudo chroot $(SANDBOX_UBUNTU) /usr/bin/env -i \
-  LC_ALL=C \
-  DEBIAN_FRONTEND=noninteractive \
-  DEBCONF_NONINTERACTIVE_SEEN=true \
-  /bin/sh -c 'locale-gen en_US.UTF-8; dpkg-reconfigure locales'
+sudo chroot $(SANDBOX_UBUNTU) /bin/sh -c 'locale-gen en_US.UTF-8; dpkg-reconfigure locales'
 echo "Preparing directory for chroot local mirror"
 sudo mkdir -p $(SANDBOX_UBUNTU)/etc/apt/preferences.d/
 echo "Generating pinning file for Ubuntu SandBox"
@@ -258,11 +243,9 @@ show-centos-sandbox-repos: export yum_upstream_repo_content:=$(yum_upstream_repo
 show-centos-sandbox-repos: export yum_epel_repo_content:=$(yum_epel_repo)
 show-centos-sandbox-repos: export yum_local_repo_content:=$(yum_local_repo)
 show-centos-sandbox-repos: export yum_local_mos_repo_content:=$(yum_local_mos_repo)
-show-centos-sandbox-repos: export yum_extra_build_repo_content:=$(yum_extra_build_repo)
 show-centos-sandbox-repos:
 	/bin/echo -e "$${sandbox_yum_conf_content}\n"
 	/bin/echo -e "$${yum_upstream_repo_content}\n"
 	/bin/echo -e "$${yum_epel_repo_content}\n"
 	/bin/echo -e "$${yum_local_repo_content}\n"
 	/bin/echo -e "$${yum_local_mos_repo_content}\n"
-	/bin/echo -e "$${yum_extra_build_repo_content}\n"
