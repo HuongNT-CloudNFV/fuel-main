@@ -1,5 +1,7 @@
 install
 text
+repo --name=mos --baseurl=file:///run/install/repo/mos-centos
+repo --name=extra --baseurl=file:///run/install/repo/extra-repos/proposed
 %include /tmp/source.ks
 {{reboot}}
 lang en_US.UTF-8
@@ -390,6 +392,9 @@ OPENSTACK_VERSION=`rpm2cpio ${SOURCE}/mos-centos/Packages/fuel-openstack-metadat
 test -e ${SOURCE}/fuel_build_number && cp ${SOURCE}/fuel_build_number /etc/fuel_build_number
 test -e ${SOURCE}/fuel_build_id && cp ${SOURCE}/fuel_build_id /etc/fuel_build_id
 
+# Copy repos config
+test -e ${SOURCE}/default_deb_repos.yaml && cp ${SOURCE}/default_deb_repos.yaml /root/default_deb_repos.yaml
+
 # ----------------------
 # UNPACKING REPOSITORIES
 # ----------------------
@@ -446,6 +451,7 @@ set -x
 
 source "/root/anaconda.cmdline.vars"
 SOURCE=/tmp/source
+FS=/tmp/fs
 
 # Prepare bootstrap_admin_node config
 mkdir -p /etc/fuel
@@ -458,7 +464,7 @@ wait_for_external_config=${wait_for_external_config:-no}
 EOF
 
 # Unmounting source
-umount -f ${SOURCE}
+umount -f ${SOURCE} || true
 rm -rf ${SOURCE}
 
 umount -f ${FS} || true

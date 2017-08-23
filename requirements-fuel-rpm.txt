@@ -6,13 +6,11 @@ fuel-ha-utils
 fuel-library
 fuelmenu
 fuel-migrate
-fuel-mirror
 fuel-misc
 fuel-nailgun
 fuel-notify
 fuel-openstack-metadata
 fuel-ostf
-fuel-provisioning-scripts
 fuel-rabbit-fence
 fuel-release
 fuel-umm
@@ -22,6 +20,7 @@ nailgun-mcagents
 network-checker
 python-fuelclient
 python-packetary
+python-timmy
 rubygem-astute
 send2syslog
 shotgun

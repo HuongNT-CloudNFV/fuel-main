@@ -203,3 +203,4 @@ USE_PREDEFINED_FUEL_LIB_PUPPET_MODULES?=
 # proxy configuration in format:
 # PROXY_CONFIG="http_proxy=http://proxy_ip_address:proxy_port https_proxy=https://proxy_ip_address:proxy_port no_proxy=localhost"
 PROXY_CONFIG?=
+
