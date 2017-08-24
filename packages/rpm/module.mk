@@ -61,6 +61,7 @@ $(BUILD_DIR)/packages/rpm/$1.done:
 	-test -f $(BUILD_DIR)/packages/sources/$1/changelog && cat $(BUILD_DIR)/packages/sources/$1/changelog >> $$(SPECFILE)
 	sudo cp $$(SPECFILE) $$(SANDBOX)/tmp && \
 	sudo chroot $$(SANDBOX) yum-builddep -y /tmp/$1.spec
+        sudo cp $$(SPECFILE) $$(SANDBOX)/tmp && \
 	test -f $$(SANDBOX)/tmp/SOURCES/version && \
 		sudo chroot $$(SANDBOX) rpmbuild --nodeps --define "_topdir /tmp" --define "release `awk -F'=' '/RPMRELEASE/ {print $$$$2}' $$(SANDBOX)/tmp/SOURCES/version`" -ba /tmp/$1.spec || \
 		sudo chroot $$(SANDBOX) rpmbuild --nodeps --define "_topdir /tmp" -ba /tmp/$1.spec
